@@ -84,12 +84,12 @@ export default function Contact() {
 
       {/* CRT overlay effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 z-10 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[url('/crt-lines.png')] bg-repeat opacity-5 z-10 pointer-events-none"></div>
+      {/* <div className="absolute inset-0 bg-[url('/crt-lines.png')] bg-repeat opacity-5 z-10 pointer-events-none"></div> */}
 
       {/* Background video */}
-      <video autoPlay muted loop className="absolute w-full h-full object-cover">
+      {/* <video autoPlay muted loop className="absolute w-full h-full object-cover">
         <source src="/retro_city.mp4" type="video/mp4" />
-      </video>
+      </video> */}
 
       <div className="container px-4 relative z-20">
         <motion.div
