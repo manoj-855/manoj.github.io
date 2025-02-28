@@ -98,7 +98,7 @@ export default function Services() {
   return (
     <section id="service" className="py-20 relative overflow-hidden">
       {/* Retro grid background */}
-      <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5 z-0"></div>
+      {/* <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5 z-0"></div> */}
       
       {/* Decorative elements */}
       <div className="absolute top-20 left-10 w-16 h-16 border-2 border-primary/30 animate-pulse"></div>
