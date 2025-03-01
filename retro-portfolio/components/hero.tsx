@@ -39,6 +39,23 @@ export default function Hero() {
   })
   const [typingComplete, setTypingComplete] = useState<boolean>(false)
   const [loadingProgress, setLoadingProgress] = useState<number>(0)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+  
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    // Initial check
+    checkMobile()
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile)
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Boot sequence animation
   useEffect(() => {
@@ -117,8 +134,9 @@ export default function Hero() {
               response: cmdInfo.response
             }
             
-            // Keep only the last 3 commands
-            setCommandHistory(prev => [...prev.slice(-2), newCommand])
+            // Keep only the last 3 commands on desktop, 2 on mobile
+            const historyLimit = isMobile ? 1 : 2
+            setCommandHistory(prev => [...prev.slice(-historyLimit), newCommand])
             
             // Update player stats
             setPlayerStats(prev => {
@@ -141,7 +159,7 @@ export default function Hero() {
         typed.destroy()
       }
     }
-  }, [bootSequence])
+  }, [bootSequence, isMobile])
 
   // Blinking cursor effect
   useEffect(() => {
@@ -176,7 +194,7 @@ export default function Hero() {
             transition={{ duration: 0.5 }}
             className="mb-4"
           >
-            <pre className="text-sm md:text-base text-center">
+            <pre className="text-xs md:text-base text-center overflow-x-auto">
               {`
   _    _      _ _         __          __        _     _ _ 
  | |  | |    | | |        \\ \\        / /       | |   | | |
@@ -234,7 +252,7 @@ export default function Hero() {
             transition={{ duration: 0.5 }}
             className="mt-6 text-center"
           >
-            <p className="text.pulsate">Press ENTER to access terminal...</p>
+            <p className="text-pulsate">Press ENTER to access terminal...</p>
           </motion.div>
         </div>
       </section>
@@ -259,99 +277,174 @@ export default function Hero() {
       {/* Noise overlay */}
       <div className="absolute inset-0 bg-noise opacity-5 z-10"></div>
       
-      <div className="container relative z-20 px-4 max-w-5xl mx-auto">
+      <div className="container relative z-20 px-2 md:px-4 max-w-5xl mx-auto">
         <div className="bg-black/95 border-2 border-green-500 rounded-md p-2 md:p-4 terminal-shadow">
           {/* Terminal top bar */}
-          <div className="flex items-center justify-between bg-gray-900 px-3 py-1 mb-2 rounded">
-            <div className="text-white font-mono text-sm md:text-base flex items-center">
-              <span className="text-green-400 mr-2">●</span>
-              <span>manoj@developer:~/portfolio</span>
+          <div className="flex items-center justify-between bg-gray-900 px-2 md:px-3 py-1 mb-2 rounded">
+            <div className="text-white font-mono text-xs md:text-base flex items-center">
+              <span className="text-green-400 mr-1 md:mr-2">●</span>
+              <span className="truncate">manoj@developer:~/portfolio</span>
             </div>
-            <div className="flex space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full cursor-pointer hover:brightness-125"></div>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full cursor-pointer hover:brightness-125"></div>
-              <div className="w-3 h-3 bg-green-500 rounded-full cursor-pointer hover:brightness-125"></div>
-            </div>
-          </div>
-          
-          {/* System metrics row */}
-          <div className="flex justify-between items-center mb-3 bg-gray-900/60 p-2 rounded text-xs md:text-sm font-mono">
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">CPU:</span>
-              <div className="w-20 bg-gray-700 rounded-full h-1.5">
-                <div 
-                  className={`h-1.5 rounded-full ${cpuUsage > 80 ? 'bg-red-500' : 'bg-green-500'}`}
-                  style={{ width: `${cpuUsage}%` }}
-                ></div>
-              </div>
-              <span className="ml-1 text-gray-300">{cpuUsage}%</span>
-            </div>
-            
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">MEM:</span>
-              <div className="w-20 bg-gray-700 rounded-full h-1.5">
-                <div 
-                  className={`h-1.5 rounded-full ${memUsage > 75 ? 'bg-red-500' : 'bg-green-500'}`}
-                  style={{ width: `${memUsage}%` }}
-                ></div>
-              </div>
-              <span className="ml-1 text-gray-300">{memUsage}%</span>
-            </div>
-            
-            <div className="text-cyan-400">
-              <span className="mr-1">UPTIME:</span>
-              <span>{playerStats.uptime} days</span>
-            </div>
-            
-            <div className="text-purple-400">
-              <span className="mr-1">COMMITS:</span>
-              <span>{playerStats.commits}</span>
-            </div>
-            
-            <div className="text-yellow-400">
-              <span className="mr-1">PROJECTS:</span>
-              <span>{playerStats.projects}</span>
+            <div className="flex space-x-1 md:space-x-2">
+              <div className="w-2 h-2 md:w-3 md:h-3 bg-red-500 rounded-full cursor-pointer hover:brightness-125"></div>
+              <div className="w-2 h-2 md:w-3 md:h-3 bg-yellow-500 rounded-full cursor-pointer hover:brightness-125"></div>
+              <div className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full cursor-pointer hover:brightness-125"></div>
             </div>
           </div>
           
-          {/* Player stats row */}
-          <div className="flex justify-between items-center mb-4 bg-gray-900/60 p-2 rounded text-xs md:text-sm font-mono">
-            <div>
-              <span className="text-gray-400 mr-1">DEV LEVEL:</span>
-              <span className="text-green-400 font-bold">[{playerStats.level}]</span>
-            </div>
-            
-            <div className="flex items-center">
-              <span className="text-gray-400 mr-2">XP:</span>
-              <div className="w-32 bg-gray-700 rounded-full h-1.5">
-                <div 
-                  className="bg-yellow-500 h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: `${xpPercentage}%` }}
-                ></div>
-              </div>
-              <span className="ml-1 text-gray-300">{playerStats.xp}/100</span>
-            </div>
-            
-            <div>
-              <span className="text-gray-400 mr-1">SKILLS:</span>
-              <span className="text-cyan-400">{playerStats.skills.length}</span>
-            </div>
-            
-            <div>
-              <span className="text-gray-400 mr-1">CLASS:</span>
-              <span className="text-purple-400">Full-Stack Engineer</span>
-            </div>
-          </div>
-          
-          {/* Command history */}
-          <div className="font-mono text-sm md:text-base mb-4 terminal-text p-2 bg-black rounded border border-gray-800">
-            {commandHistory.map((item, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex text-green-400 items-center">
-                  <span className="text-yellow-400 mr-2">manoj@developer:~$</span>
-                  <span>{item.command}</span>
+          {/* System metrics row - Simplified for mobile */}
+          {isMobile ? (
+            <div className="grid grid-cols-2 gap-2 mb-3 bg-gray-900/60 p-2 rounded text-xs font-mono">
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-1">CPU:</span>
+                <div className="w-12 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${cpuUsage > 80 ? 'bg-red-500' : 'bg-green-500'}`}
+                    style={{ width: `${cpuUsage}%` }}
+                  ></div>
                 </div>
-                <div className="text-gray-300 whitespace-pre-line pl-4 mt-1 font-mono text-sm leading-relaxed">
+                <span className="ml-1 text-gray-300">{cpuUsage}%</span>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-1">MEM:</span>
+                <div className="w-12 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${memUsage > 75 ? 'bg-red-500' : 'bg-green-500'}`}
+                    style={{ width: `${memUsage}%` }}
+                  ></div>
+                </div>
+                <span className="ml-1 text-gray-300">{memUsage}%</span>
+              </div>
+              
+              <div className="text-cyan-400 text-xs">
+                <span className="mr-1">UP:</span>
+                <span>{playerStats.uptime}d</span>
+              </div>
+              
+              <div className="text-purple-400 text-xs flex items-center justify-between">
+                <div>
+                  <span className="mr-1">GIT:</span>
+                  <span>{playerStats.commits}</span>
+                </div>
+                <div>
+                  <span className="mr-1">PRJ:</span>
+                  <span>{playerStats.projects}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center mb-3 bg-gray-900/60 p-2 rounded text-xs md:text-sm font-mono">
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-2">CPU:</span>
+                <div className="w-20 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${cpuUsage > 80 ? 'bg-red-500' : 'bg-green-500'}`}
+                    style={{ width: `${cpuUsage}%` }}
+                  ></div>
+                </div>
+                <span className="ml-1 text-gray-300">{cpuUsage}%</span>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-2">MEM:</span>
+                <div className="w-20 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${memUsage > 75 ? 'bg-red-500' : 'bg-green-500'}`}
+                    style={{ width: `${memUsage}%` }}
+                  ></div>
+                </div>
+                <span className="ml-1 text-gray-300">{memUsage}%</span>
+              </div>
+              
+              <div className="text-cyan-400">
+                <span className="mr-1">UPTIME:</span>
+                <span>{playerStats.uptime} days</span>
+              </div>
+              
+              <div className="text-purple-400">
+                <span className="mr-1">COMMITS:</span>
+                <span>{playerStats.commits}</span>
+              </div>
+              
+              <div className="text-yellow-400">
+                <span className="mr-1">PROJECTS:</span>
+                <span>{playerStats.projects}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Player stats row - Simplified for mobile */}
+          {isMobile ? (
+            <div className="grid grid-cols-2 gap-2 mb-3 bg-gray-900/60 p-2 rounded text-xs font-mono">
+              <div>
+                <span className="text-gray-400 mr-1">LVL:</span>
+                <span className="text-green-400 font-bold">[{playerStats.level}]</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 mr-1">XP:</span>
+                <span className="text-yellow-400">{playerStats.xp}/100</span>
+              </div>
+              
+              <div className="col-span-2">
+                <div className="w-full bg-gray-700 rounded-full h-1.5 mt-1">
+                  <div 
+                    className="bg-yellow-500 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${xpPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 mr-1">CLASS:</span>
+                <span className="text-purple-400">Full-Stack</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 mr-1">SKILLS:</span>
+                <span className="text-cyan-400">{playerStats.skills.length}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center mb-4 bg-gray-900/60 p-2 rounded text-xs md:text-sm font-mono">
+              <div>
+                <span className="text-gray-400 mr-1">DEV LEVEL:</span>
+                <span className="text-green-400 font-bold">[{playerStats.level}]</span>
+              </div>
+              
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-2">XP:</span>
+                <div className="w-32 bg-gray-700 rounded-full h-1.5">
+                  <div 
+                    className="bg-yellow-500 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${xpPercentage}%` }}
+                  ></div>
+                </div>
+                <span className="ml-1 text-gray-300">{playerStats.xp}/100</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 mr-1">SKILLS:</span>
+                <span className="text-cyan-400">{playerStats.skills.length}</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-400 mr-1">CLASS:</span>
+                <span className="text-purple-400">Full-Stack Engineer</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Command history - Adjust height for mobile */}
+          <div className="font-mono text-xs md:text-base mb-3 terminal-text p-2 bg-black rounded border border-gray-800" style={{ height: isMobile ? '120px' : '180px' }}>
+            {commandHistory.map((item, index) => (
+              <div key={index} className="mb-3">
+                <div className="flex text-green-400 items-center">
+                  <span className="text-yellow-400 mr-1 md:mr-2 text-xs md:text-sm">manoj$</span>
+                  <span className="text-xs md:text-sm">{item.command}</span>
+                </div>
+                <div className="text-gray-300 whitespace-pre-line pl-2 md:pl-4 mt-1 font-mono text-xs md:text-sm leading-tight md:leading-relaxed">
                   {item.response}
                 </div>
               </div>
@@ -359,16 +452,18 @@ export default function Hero() {
           </div>
           
           {/* Current command line */}
-          <div className="font-mono text-sm md:text-base flex items-center p-2 bg-gray-900/40 rounded">
-            <span className="text-yellow-400 mr-2">manoj@developer:~$</span>
-            <span className={`text-green-400 ${typingComplete ? 'command-complete' : ''}`} ref={terminalRef}></span>
-            <span className="text-white w-2 h-4 bg-white inline-block ml-1" ref={cursorRef}></span>
+          <div className="font-mono text-xs md:text-base flex items-center p-2 bg-gray-900/40 rounded">
+            <span className="text-yellow-400 mr-1 md:mr-2 text-xs md:text-sm">manoj$</span>
+            <span className={`text-green-400 text-xs md:text-sm ${typingComplete ? 'command-complete' : ''}`} ref={terminalRef}></span>
+            <span className="text-white w-1 md:w-2 h-3 md:h-4 bg-white inline-block ml-1" ref={cursorRef}></span>
           </div>
           
-          {/* Command help */}
-          <div className="mt-2 bg-gray-900/40 p-2 rounded text-xs text-gray-500 font-mono">
-            Available commands: whoami, ls -la skills/, cat skills/frontend/frameworks.txt, ./run-portfolio.sh, git log...
-          </div>
+          {/* Command help - Hide on mobile to save space */}
+          {!isMobile && (
+            <div className="mt-2 bg-gray-900/40 p-2 rounded text-xs text-gray-500 font-mono">
+              Available commands: whoami, ls -la skills/, cat skills/frontend/frameworks.txt, ./run-portfolio.sh, git log...
+            </div>
+          )}
         </div>
         
         {/* Bio card */}
@@ -376,32 +471,35 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ delay: 1, duration: 0.8 }}
-          className="mt-6 text-center"
+          className="mt-4 md:mt-6 text-center"
         >
-          <h1 className="text-3xl md:text-5xl font-pressStart mb-4 text-green-500 text-glow" data-text="MANOJ YADAV">
+          <h1 className="text-xl md:text-3xl lg:text-5xl font-pressStart mb-2 md:mb-4 text-green-500 text-glow" data-text="MANOJ YADAV">
             MANOJ YADAV
           </h1>
           
-          <div className="text-lg md:text-xl font-mono text-green-300 mb-4 bg-black/70 inline-block px-4 py-1 rounded-sm border-l-2 border-r-2 border-green-500">
-            <span className="typing-indicator">Full Stack Engineer | TypeScript Wizard | AI Explorer</span>
+          <div className="text-sm md:text-lg lg:text-xl font-mono text-green-300 mb-2 md:mb-4 bg-black/70 inline-block px-3 py-1 rounded-sm border-l-2 border-r-2 border-green-500">
+            <span className="typing-indicator">Full Stack | TS Wizard | AI Explorer</span>
           </div>
           
           <a
             href="#about"
-            className="inline-block py-2 px-6 bg-green-500 text-black font-pressStart text-sm crt-button hover:bg-green-400 transition-all"
+            className="inline-block py-1 md:py-2 px-4 md:px-6 bg-green-500 text-black font-pressStart text-xs md:text-sm crt-button hover:bg-green-400 transition-all"
           >
-            [INITIALIZE CONNECTION] <span className="blink">_</span>
+            [INITIALIZE] <span className="blink">_</span>
           </a>
         </motion.div>
         
-        <motion.div 
-          className="absolute right-10 bottom-20 hidden md:block"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-        >
-          <ThreeScene />
-        </motion.div>
+        {/* 3D Scene - Only show on desktop */}
+        {!isMobile && (
+          <motion.div 
+            className="absolute right-10 bottom-20 hidden md:block"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: 0.5 }}
+          >
+            <ThreeScene />
+          </motion.div>
+        )}
       </div>
       
       {/* Custom CSS */}
@@ -417,10 +515,19 @@ export default function Hero() {
           box-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.2);
         }
         .terminal-text {
-          height: 180px;
           overflow-y: auto;
           scrollbar-width: thin;
           scrollbar-color: #4ade80 #111;
+        }
+        .terminal-text::-webkit-scrollbar {
+          width: 4px;
+        }
+        .terminal-text::-webkit-scrollbar-track {
+          background: #111;
+        }
+        .terminal-text::-webkit-scrollbar-thumb {
+          background-color: #4ade80;
+          border-radius: 2px;
         }
         .crt-button {
           box-shadow: 0 4px 0 #2b8c46, inset 0 1px 0 rgba(255,255,255,0.2);
@@ -447,7 +554,7 @@ export default function Hero() {
         .command-complete {
           border-bottom: 1px solid #4ade80;
         }
-        .pulsate {
+        .text-pulsate {
           animation: pulsate 1.5s ease-out infinite;
         }
         @keyframes pulsate {

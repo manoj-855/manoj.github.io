@@ -54,7 +54,7 @@ const projects = [
     title: "WorkSpace",
     category: "Web Development",
     date: "15 July 2023",
-    image: "/workspace.png",
+    image: "/Workspace.png",
     description: "Project management tool",
     link: "https://work-space-dusky.vercel.app/",
     github: "https://github.com/ydv-manoj/WorkSpace",

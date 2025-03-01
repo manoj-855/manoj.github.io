@@ -252,91 +252,91 @@ export default function GithubProjects() {
               </div>
             ) : (
               <AnimatePresence>
-                <div className="grid md:grid-cols-2 gap-8">
-                  {displayedRepos.slice(0, visibleCount).map((repo, index) => (
-                    <motion.div
-                      key={repo.id}
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-card p-6 retro-border relative group hover:border-accent transition-colors hover:translate-y-1"
-                    >
-                      <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-r-[40px] border-t-transparent border-r-primary transform translate-x-px -translate-y-px"></div>
-                      
-                      <h3 className="text-xl font-pressStart mb-2 truncate pr-8">{repo.name}</h3>
-                      <p className="font-vt323 text-muted-foreground mb-4 h-12 overflow-hidden">
-                        {repo.description || "No description provided"}
-                      </p>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+    {displayedRepos.slice(0, visibleCount).map((repo, index) => (
+      <motion.div
+        key={repo.id}
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+        className="bg-card p-4 md:p-6 retro-border relative group hover:border-accent transition-colors hover:translate-y-1 w-full"
+      >
+        <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-r-[40px] border-t-transparent border-r-primary transform translate-x-px -translate-y-px"></div>
+        
+        <h3 className="text-lg md:text-xl font-pressStart mb-2 truncate pr-8">{repo.name}</h3>
+        <p className="font-vt323 text-muted-foreground mb-4 h-12 overflow-hidden text-sm md:text-base">
+          {repo.description || "No description provided"}
+        </p>
 
-                      {/* Topics/Tags */}
-                      {repo.topics && repo.topics.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {repo.topics.slice(0, 3).map(topic => (
-                            <span
-                              key={topic}
-                              className="inline-block bg-secondary/20 px-2 py-0.5 text-xs font-vt323"
-                              onClick={() => setSearchTerm(topic)}
-                            >
-                              #{topic}
-                            </span>
-                          ))}
-                          {repo.topics.length > 3 && (
-                            <span className="inline-block bg-black/50 px-2 py-0.5 text-xs font-vt323">
-                              +{repo.topics.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
+        {/* Topics/Tags */}
+        {repo.topics && repo.topics.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {repo.topics.slice(0, 3).map(topic => (
+              <span
+                key={topic}
+                className="inline-block bg-secondary/20 px-2 py-0.5 text-xs font-vt323"
+                onClick={() => setSearchTerm(topic)}
+              >
+                #{topic}
+              </span>
+            ))}
+            {repo.topics.length > 3 && (
+              <span className="inline-block bg-black/50 px-2 py-0.5 text-xs font-vt323">
+                +{repo.topics.length - 3}
+              </span>
+            )}
+          </div>
+        )}
 
-                      <div className="flex flex-wrap gap-4 mb-4">
-                        {repo.language && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <div className="w-3 h-3 rounded-full bg-primary"></div>
-                            <span>{repo.language}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-sm">
-                          <Star size={14} className="text-yellow-400" />
-                          <span>{repo.stargazers_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-sm">
-                          <GitFork size={14} />
-                          <span>{repo.forks_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Clock size={14} />
-                          <span>Updated {formatDate(repo.updated_at)}</span>
-                        </div>
-                      </div>
+        <div className="flex flex-wrap gap-2 md:gap-4 mb-4 text-xs md:text-sm">
+          {repo.language && (
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-primary"></div>
+              <span>{repo.language}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1">
+            <Star size={12} className="text-yellow-400" />
+            <span>{repo.stargazers_count}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <GitFork size={12} />
+            <span>{repo.forks_count}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={12} />
+            <span className="whitespace-nowrap">Updated {formatDate(repo.updated_at)}</span>
+          </div>
+        </div>
 
-                      <div className="flex gap-2">
-                        <a
-                          href={repo.html_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="py-2 px-4 bg-primary text-black font-pressStart text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all inline-flex items-center gap-2"
-                        >
-                          <Github size={16} />
-                          REPO
-                        </a>
-                        
-                        {repo.homepage && (
-                          <a
-                            href={repo.homepage}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="py-2 px-4 bg-secondary text-white font-pressStart text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all inline-flex items-center gap-2"
-                          >
-                            <ExternalLink size={16} />
-                            DEMO
-                          </a>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </AnimatePresence>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={repo.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-1 md:py-2 px-3 md:px-4 bg-primary text-black font-pressStart text-xs md:text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all inline-flex items-center gap-1 md:gap-2"
+          >
+            <Github size={14} />
+            REPO
+          </a>
+          
+          {repo.homepage && (
+            <a
+              href={repo.homepage}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-1 md:py-2 px-3 md:px-4 bg-secondary text-white font-pressStart text-xs md:text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all inline-flex items-center gap-1 md:gap-2"
+            >
+              <ExternalLink size={14} />
+              DEMO
+            </a>
+          )}
+        </div>
+      </motion.div>
+    ))}
+  </div>
+</AnimatePresence>
             )}
 
             {displayedRepos.length > visibleCount && (
