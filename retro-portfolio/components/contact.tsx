@@ -281,7 +281,7 @@ export default function Contact() {
               <div className="flex gap-4">
                 {[
                   { icon: Facebook, url: "https://www.facebook.com/moji.rao.338", label: "Facebook" },
-                  { icon: Instagram, url: "https://www.instagram.com/__manoj__ydv__/", label: "Instagram" },
+                  { icon: Instagram, url: "https://www.instagram.com/byteofmanoj/", label: "Instagram" },
                   { icon: Twitter, url: "https://twitter.com/ManojYa82895275", label: "Twitter" },
                   { icon: Linkedin, url: "https://www.linkedin.com/in/manoj-yadav-41806b202/", label: "LinkedIn" }
                 ].map((social, index) => (

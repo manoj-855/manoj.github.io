@@ -7,10 +7,14 @@ import { motion, useInView, AnimatePresence } from "framer-motion"
 export default function About() {
   const ref = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
+  const pageRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
   const [showError, setShowError] = useState(false)
   const [terminalLines, setTerminalLines] = useState<string[]>([])
   const [batteryLevel, setBatteryLevel] = useState(Math.floor(Math.random() * 30) + 70)
+  const [isRecovering, setIsRecovering] = useState(false)
+  const [recoveryCount, setRecoveryCount] = useState(5)
+  const [showGlitch, setShowGlitch] = useState(false)
   
   // Scroll terminal to bottom when new lines are added
   useEffect(() => {
@@ -18,6 +22,28 @@ export default function About() {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight
     }
   }, [terminalLines])
+
+  // Recovery countdown effect
+  useEffect(() => {
+    let countdownInterval: NodeJS.Timeout
+    
+    if (isRecovering) {
+      countdownInterval = setInterval(() => {
+        setRecoveryCount((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval)
+            setIsRecovering(false)
+            setShowGlitch(false)
+            setRecoveryCount(5)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => clearInterval(countdownInterval)
+  }, [isRecovering])
 
   const handleDangerClick = () => {
     setShowError(true)
@@ -68,15 +94,171 @@ export default function About() {
       delay += line.startsWith("$") || line.startsWith("#") ? 300 : 150
     })
     
+    // Start countdown to system failure after terminal finishes
     setTimeout(() => {
       setShowError(false)
-      setTerminalLines([])
+      triggerSystemFailure()
     }, 7000)
+  }
+  
+  const triggerSystemFailure = () => {
+    // Trigger glitch effect on the whole page
+    setShowGlitch(true)
+    
+    // Random battery drain
+    const drainInterval = setInterval(() => {
+      setBatteryLevel(prev => {
+        const newLevel = prev - Math.floor(Math.random() * 15 + 5)
+        return newLevel < 5 ? 5 : newLevel
+      })
+    }, 200)
+    
+    // Show warning notification and start recovery after 2 seconds
+    setTimeout(() => {
+      clearInterval(drainInterval)
+      setIsRecovering(true)
+      
+      // Restore battery level gradually
+      const chargeInterval = setInterval(() => {
+        setBatteryLevel(prev => {
+          const newLevel = prev + Math.floor(Math.random() * 3 + 1)
+          if (newLevel >= 85) {
+            clearInterval(chargeInterval)
+            return Math.floor(Math.random() * 10 + 85)
+          }
+          return newLevel
+        })
+      }, 500)
+    }, 2000)
   }
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-card to-black" ref={ref}>
-      <div className="container px-4">
+    <section 
+      id="about" 
+      className="py-20 bg-gradient-to-b from-card to-black relative" 
+      ref={ref}
+    >
+      {/* Glitch overlay */}
+      {showGlitch && (
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-red-500 mix-blend-overlay opacity-20"
+            animate={{ 
+              opacity: [0.2, 0.4, 0.1, 0.3, 0.2],
+              x: [0, -5, 10, -8, 0],
+              y: [0, 5, -5, 8, 0]
+            }}
+            transition={{ repeat: Infinity, duration: 0.5 }}
+          />
+          {Array.from({ length: 10 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute bg-blue-500 mix-blend-screen"
+              style={{
+                height: Math.random() * 2 + 1 + "px",
+                width: "100%",
+                left: 0,
+                top: Math.random() * 100 + "%",
+              }}
+              animate={{
+                x: [0, "100vw", "-100vw", 0],
+                opacity: [0, 0.8, 0.1, 0]
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: Math.random() * 0.5 + 0.3,
+                delay: Math.random() * 2
+              }}
+            />
+          ))}
+          {Array.from({ length: 20 }).map((_, i) => (
+            <motion.div
+              key={`v-${i}`}
+              className="absolute bg-green-500 mix-blend-screen"
+              style={{
+                width: Math.random() * 2 + 1 + "px",
+                height: "100%",
+                top: 0,
+                left: Math.random() * 100 + "%",
+              }}
+              animate={{
+                y: [0, "100vh", "-100vh", 0],
+                opacity: [0, 0.6, 0.2, 0]
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: Math.random() * 0.5 + 0.3,
+                delay: Math.random() * 2
+              }}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Recovery countdown overlay */}
+      <AnimatePresence>
+        {isRecovering && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 flex-col"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.2, 1],
+                rotate: [0, 5, -5, 0] 
+              }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="w-32 h-32 mb-8"
+            >
+              <Image
+                src="/Critical_Error.webp"
+                alt="System Error"
+                width={128}
+                height={128}
+                className="object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 24 24' fill='%23ff0000' stroke='%23ff0000' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/%3E%3Ccircle cx='9' cy='9' r='1'/%3E%3Ccircle cx='15' cy='9' r='1'/%3E%3Cpath d='M8 15h8M12 12v3'/%3E%3C/svg%3E";
+                }}
+              />
+            </motion.div>
+
+            
+            
+            <div className="text-center">
+              <h2 className="text-4xl font-pressStart text-red-500 mb-6 glitch-text" data-text="SYSTEM FAILURE">
+                SYSTEM FAILURE
+              </h2>
+              
+              <div className="p-4 bg-black border-2 border-red-500 mb-6 max-w-md font-vt323 text-lg">
+                <p className="text-white mb-2">CRC ERROR: 0xDEADBEEF</p>
+                <p className="text-red-400 mb-2">MEMORY CORRUPTION DETECTED</p>
+                <p className="text-green-400">INITIATING EMERGENCY RECOVERY...</p>
+                
+                <div className="w-full bg-gray-800 h-4 mt-4 retro-border">
+                  <motion.div 
+                    className="h-full bg-green-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(5 - recoveryCount) * 20}%` }}
+                    transition={{ type: "spring", stiffness: 50 }}
+                  />
+                </div>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute -inset-1 bg-green-500/30 rounded-lg blur-md"></div>
+                <div className="relative font-pressStart text-2xl p-2 bg-black retro-border border-2 border-green-500 text-green-500">
+                  SYSTEM RESTORE IN {recoveryCount}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="container px-4" ref={pageRef}>
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -276,12 +458,75 @@ export default function About() {
                   <div className="flex justify-center">
                     <button
                       onClick={handleDangerClick}
-                      className="py-2 px-4 bg-red-600 text-white font-pressStart text-sm retro-border border-2 border-red-400 animate-pulse hover:bg-red-700 transition-colors relative group"
+                      className="py-3 px-6 bg-red-600 text-white font-pressStart text-sm retro-border border-2 border-red-400 relative group overflow-hidden"
                     >
-                      <span className="absolute -top-10 left-0 right-0 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-red-300">
-                        SERIOUSLY, DON'T!
-                      </span>
-                      ⚠️ DANGER ! DO NOT CLICK ! 💀
+                      {/* Danger signs */}
+                      <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8">
+                        <motion.div
+                          animate={{ 
+                            rotate: [0, 360],
+                          }}
+                          transition={{ 
+                            repeat: Infinity, 
+                            duration: 4
+                          }}
+                          className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-red-600 font-bold"
+                        >
+                          !
+                        </motion.div>
+                      </div>
+                      
+                      <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8">
+                        <motion.div
+                          animate={{ 
+                            rotate: [0, -360],
+                          }}
+                          transition={{ 
+                            repeat: Infinity, 
+                            duration: 4
+                          }}
+                          className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-red-600 font-bold"
+                        >
+                          !
+                        </motion.div>
+                      </div>
+                      
+                      {/* Pulsing background */}
+                      <motion.div 
+                        className="absolute inset-0 bg-red-800 z-0"
+                        animate={{ 
+                          opacity: [0.5, 0.8, 0.5]
+                        }}
+                        transition={{ 
+                          repeat: Infinity, 
+                          duration: 1.5
+                        }}
+                      />
+                      
+                      {/* Warning text */}
+                      <motion.div
+                        animate={{ 
+                          y: ['-100%', '100%'],
+                        }}
+                        transition={{ 
+                          repeat: Infinity, 
+                          duration: 5,
+                          ease: "linear",
+                        }}
+                        className="absolute left-0 right-0 whitespace-nowrap text-yellow-300 opacity-70 font-mono text-xs"
+                      >
+                        WARNING * WARNING * WARNING * WARNING * WARNING * WARNING
+                      </motion.div>
+                      
+                      {/* Button text */}
+                      <span className="relative z-10 mx-10">⚠️ SELF-DESTRUCT ⚠️</span>
+                      
+                      {/* Tooltip */}
+                      <div className="absolute -top-16 left-0 right-0 bg-black/90 p-2 rounded border border-red-500 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="text-red-500 text-xs mb-1">⚠️ EXTREME DANGER ⚠️</div>
+                        <div className="text-white text-xs">THIS WILL CAUSE SYSTEM FAILURE!</div>
+                        <div className="w-4 h-4 bg-black/90 border-r border-b border-red-500 absolute -bottom-2 left-1/2 -translate-x-1/2 rotate-45"></div>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -290,81 +535,80 @@ export default function About() {
           </motion.div>
 
           {/* Right Section */}
-          {/* Right Section */}
-<motion.div
-  initial={{ opacity: 0, x: 50 }}
-  whileInView={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.5 }}
-  viewport={{ once: true }}
-  className="bg-card p-6 retro-border h-full"
->
-  <h3 className="text-2xl font-pressStart mb-6">SYSTEM SPECS</h3>
-  
-  {/* Education Section */}
-  <div className="mb-6 font-vt323">
-    <div className="flex items-center mb-2">
-      <div className="w-2 h-6 bg-primary mr-2"></div>
-      <h4 className="text-xl text-yellow-400">EDUCATION_MODULE</h4>
-    </div>
-    <div className="pl-4 border-l border-primary/30">
-      <p className="flex justify-between">
-        <span className="text-white">Delhi Technological University</span>
-        <span className="text-accent">2020-2024</span>
-      </p>
-      <p className="text-muted-foreground">B.Tech in Mathematics and Computing Engineering</p>
-      <p className="text-green-400">CGPA: 8.6 <span className="text-xs">[STATUS: OPTIMAL]</span></p>
-    </div>
-  </div>
-  
-  {/* Work Experience */}
-  <div className="mb-6 font-vt323">
-    <div className="flex items-center mb-2">
-      <div className="w-2 h-6 bg-primary mr-2"></div>
-      <h4 className="text-xl text-yellow-400">EXPERIENCE_LOG</h4>
-    </div>
-    
-    <div className="pl-4 border-l border-primary/30 mb-4">
-      <p className="flex justify-between">
-        <span className="text-white">TerraDX Technologies Inc.</span>
-        <span className="text-accent">Feb 2024-Present</span>
-      </p>
-      <p className="text-muted-foreground">Web Developer <span className="text-xs text-green-400 ml-2">[ONLINE]</span></p>
-      <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-        <li className="text-green-300">Engineered QuantumDX: Next.js + FastAPI + Mapbox + Azure K8s</li>
-        <li className="text-green-300">Built GAIA (RAG chatbot): Next.js + TypeScript + OpenAI + LangChain</li>
-        <li className="text-green-300">Developed multi-agent system for automated code generation</li>
-        <li className="text-green-300">Created geological data scraping pipeline with Selenium + Azure</li>
-      </ul>
-    </div>
-    
-    <div className="pl-4 border-l border-primary/30">
-      <p className="flex justify-between">
-        <span className="text-white">BUZZONEARTH</span>
-        <span className="text-accent">Jun 2023-Jul 2023</span>
-      </p>
-      <p className="text-muted-foreground">Web Developer Intern <span className="text-xs text-blue-400 ml-2">[ARCHIVED]</span></p>
-      <ul className="list-disc list-inside text-sm mt-1 space-y-1">
-        <li className="text-blue-300">Climate Hackathon website (IIT Kanpur): React.js</li>
-        <li className="text-blue-300">India MUN platform: React.js + Firebase + Razorpay</li>
-        <li className="text-blue-300">Supported 4000+ student registrations and progress tracking</li>
-      </ul>
-    </div>
-  </div>
-  
-  {/* Projects */}
-  <div className="mb-6 font-vt323">
-    <div className="flex items-center mb-2">
-      <div className="w-2 h-6 bg-primary mr-2"></div>
-      <h4 className="text-xl text-yellow-400">PROJECT_DATABASE</h4>
-    </div>
-    
-    <div className="grid grid-cols-1 gap-3">
-      <div className="bg-black/30 p-3 retro-border">
-        <div className="flex justify-between items-center">
-          <h5 className="text-white">DERIBIT CRYPTO TRADING BOT</h5>
-          <span className="text-xs px-2 py-1 bg-red-900/50 text-red-400 retro-border">C++</span>
-        </div>
-        <p className="text-sm text-gray-400 mt-1">High-performance trading system with sub-ms latency, processing 10K+ msgs/sec</p>
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="bg-card p-6 retro-border h-full"
+          >
+            <h3 className="text-2xl font-pressStart mb-6">SYSTEM SPECS</h3>
+            
+            {/* Education Section */}
+            <div className="mb-6 font-vt323">
+              <div className="flex items-center mb-2">
+                <div className="w-2 h-6 bg-primary mr-2"></div>
+                <h4 className="text-xl text-yellow-400">EDUCATION_MODULE</h4>
+              </div>
+              <div className="pl-4 border-l border-primary/30">
+                <p className="flex justify-between">
+                  <span className="text-white">Delhi Technological University</span>
+                  <span className="text-accent">2020-2024</span>
+                </p>
+                <p className="text-muted-foreground">B.Tech in Mathematics and Computing Engineering</p>
+                <p className="text-green-400">CGPA: 8.6 <span className="text-xs">[STATUS: OPTIMAL]</span></p>
+              </div>
+            </div>
+            
+            {/* Work Experience */}
+            <div className="mb-6 font-vt323">
+              <div className="flex items-center mb-2">
+                <div className="w-2 h-6 bg-primary mr-2"></div>
+                <h4 className="text-xl text-yellow-400">EXPERIENCE_LOG</h4>
+              </div>
+              
+              <div className="pl-4 border-l border-primary/30 mb-4">
+                <p className="flex justify-between">
+                  <span className="text-white">TerraDX Technologies Inc.</span>
+                  <span className="text-accent">Feb 2024-Present</span>
+                </p>
+                <p className="text-muted-foreground">Web Developer <span className="text-xs text-green-400 ml-2">[ONLINE]</span></p>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  <li className="text-green-300">Engineered QuantumDX: Next.js + FastAPI + Mapbox + Azure K8s</li>
+                  <li className="text-green-300">Built GAIA (RAG chatbot): Next.js + TypeScript + OpenAI + LangChain</li>
+                  <li className="text-green-300">Developed multi-agent system for automated code generation</li>
+                  <li className="text-green-300">Created geological data scraping pipeline with Selenium + Azure</li>
+                </ul>
+              </div>
+              
+              <div className="pl-4 border-l border-primary/30">
+                <p className="flex justify-between">
+                  <span className="text-white">BUZZONEARTH</span>
+                  <span className="text-accent">Jun 2023-Jul 2023</span>
+                </p>
+                <p className="text-muted-foreground">Web Developer Intern <span className="text-xs text-blue-400 ml-2">[ARCHIVED]</span></p>
+                <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                  <li className="text-blue-300">Climate Hackathon website (IIT Kanpur): React.js</li>
+                  <li className="text-blue-300">India MUN platform: React.js + Firebase + Razorpay</li>
+                  <li className="text-blue-300">Supported 4000+ student registrations and progress tracking</li>
+                </ul>
+              </div>
+            </div>
+            
+            {/* Projects */}
+            <div className="mb-6 font-vt323">
+              <div className="flex items-center mb-2">
+                <div className="w-2 h-6 bg-primary mr-2"></div>
+                <h4 className="text-xl text-yellow-400">PROJECT_DATABASE</h4>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <div className="bg-black/30 p-3 retro-border">
+                  <div className="flex justify-between items-center">
+                    <h5 className="text-white">DERIBIT CRYPTO TRADING BOT</h5>
+                    <span className="text-xs px-2 py-1 bg-red-900/50 text-red-400 retro-border">C++</span>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-1">High-performance trading system with sub-ms latency, processing 10K+ msgs/sec</p>
       </div>
       
       <div className="bg-black/30 p-3 retro-border">
@@ -437,7 +681,7 @@ export default function About() {
   
   <div className="mt-8 flex gap-4">
     <a
-      href="/resume.pdf"
+      href="/res_manoj_new.pdf"
       target="_blank"
       className="py-2 px-4 bg-primary text-black font-pressStart text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all"
       rel="noreferrer"
@@ -540,7 +784,7 @@ export default function About() {
                   >
                     <div className="relative">
                       <Image
-                        src="/error-monster.png"
+                        src="/Critical_Error.webp"
                         alt="Error Monster"
                         width={80}
                         height={80}
