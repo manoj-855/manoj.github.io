@@ -492,7 +492,7 @@ export default function Hero() {
         {/* 3D Scene - Only show on desktop */}
         {!isMobile && (
           <motion.div 
-            className="absolute right-10 bottom-20 hidden md:block"
+            className="absolute right-[100px] bottom-[150px] hidden md:block"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 0.5 }}
