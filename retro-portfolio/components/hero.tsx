@@ -214,7 +214,7 @@ export default function Hero() {
             transition={{ delay: 0.5, duration: 0.5 }}
           >
             <div className="mb-2 text-xs md:text-sm">
-              <span className="text-cyan-400">BIOS</span> Version 4.7.5 - DTU Systems Inc.
+              <span className="text-cyan-400">BIOS</span> Version 4.7.5 - Systems Inc.
             </div>
             <div className="mb-1 text-xs md:text-sm">
               <span className="text-yellow-400">CPU:</span> BrainCore i9-12900K @ 5.2GHz
