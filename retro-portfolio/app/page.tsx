@@ -66,7 +66,7 @@ export default function Home() {
       <AudioPlayer />
       <Navbar />
       <Hero />
-      <ThreeScene />
+      {/* <ThreeScene /> */}
       <About />
       <Skills />
       <Projects />

@@ -692,7 +692,7 @@ export default function About() {
       className="py-2 px-4 bg-primary text-black font-pressStart text-sm retro-shadow hover:translate-y-1 hover:shadow-none transition-all"
       rel="noreferrer"
     >
-      DOWNLOAD SPECS 📄
+      DOWNLOAD SPECS/ RESUME 📄
     </a>
     <a
       href="https://www.linkedin.com/in/manoj-yadav-41806b202/"
